@@ -541,12 +541,18 @@ my-plugin/
 │   - dsh.bundle.patch: 指向 cordis.patch.yml
 │   - peerDependencies: 声明需要哪些 DSH 核心包
 │
-├── src/index.ts         ← 插件代码（核心逻辑在这里）
-│   - 导出 name（插件名）
-│   - 导出 apply(ctx)（插件主体）
-│   - 用 defineTool 注册工具
-│   - 用 ctx.on() 监听事件
-│   - 用 webServer 提供 Web 页面
+├── src/
+│   ├── index.ts         ← 插件主入口（核心逻辑）
+│   │   - 导出 name（插件名）
+│   │   - 导出 apply(ctx)（插件主体）
+│   │   - 用 defineTool 注册工具
+│   │   - 用 ctx.on() 监听事件
+│   │   - 用 webServer 提供 Web 页面
+│   │
+│   └── parser.ts        ← （可选）拆分复杂逻辑
+│       - 当 index.ts 代码太长时，拆到 parser.ts 里
+│       - 在 index.ts 中用 import 导入
+│       - 示例：dsh-log-viewer 就把日志解析逻辑拆到 parser.ts，有 400+ 行
 │
 ├── cordis.yml           ← 本地开发配置（不发布）
 │   - 用 file:/// 绝对路径指向 src/index.ts
@@ -565,11 +571,43 @@ my-plugin/
 │   - 工具列表
 │   - 使用说明
 │
-├── skills/              ← （可选）给 AI 注入专业知识
-│   └── guide.md         - 用 Markdown 写，AI 会自动学习
+├── skills/
+│   └── guide.md          ← （可选）给 AI 注入专业知识
+│       - 用 Markdown 写，内容会注入到 AI 的提示词中
+│       - 在 index.ts 中通过 skills.register() 注册
+│       - 示例内容：
+│         # 日志分析领域知识
 │
-├── ui/                  ← （可选）Web 界面
-│   └── index.html       - 完整的 HTML 页面
+│         ## 常见异常
+│         - NullPointerException：空指针
+│         - SQLException：数据库问题
+│
+│         ## 排查步骤
+│         1. 先看堆栈第一行
+│         2. 找到业务代码包名
+│         3. 分析根因
+│
+├── ui/
+│   └── index.html       ← （可选）Web 界面
+│       - 完整的 HTML 页面
+│       - 通过 webServer 路由提供（如 /my-plugin）
+│       - 可以调用后端 API 获取数据
+│       - 示例结构：
+│         <!DOCTYPE html>
+│         <html>
+│         <head>
+│           <link rel="stylesheet" href="style.css">
+│         </head>
+│         <body>
+│           <h1>仪表盘</h1>
+│           <div id="app"></div>
+│           <script>
+│             fetch('/my-plugin/api/data')
+│               .then(r => r.json())
+│               .then(data => { ... })
+│           </script>
+│         </body>
+│         </html>
 │
 ├── .gitignore           ← Git 忽略规则
 │   - 至少忽略 node_modules/、dist/、*.tgz
