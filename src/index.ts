@@ -307,6 +307,29 @@ export function apply(ctx: Context) {
       const target = String(args.target ?? '')
       let guide = '# DSH 插件发布指南\n\n'
 
+      guide += '## 先搞清楚：为什么要发布，必须发布吗？\n\n'
+      guide += '**不是必须的！** 如果你只打算自己用，不发布也行，本地开发测试就够了。\n\n'
+      guide += '### 为什么要发布到 GitHub？\n'
+      guide += '- 📦 **版本控制**：代码有历史记录，可以回退\n'
+      guide += '- 🤝 **协作**：同事可以看代码、提 Issue、一起修改\n'
+      guide += '- 🔍 **被发现**：打上 `dsh-plugin` 标签后，别人在 GitHub 搜索 DSH 插件时能找到你\n'
+      guide += '- 📥 **远程安装**：别人可以用 `dsh plugin add github:用户名/仓库名` 安装\n'
+      guide += '\n'
+      guide += '### 为什么要发布到 npm？\n'
+      guide += '- 📥 **短名安装**：别人可以用 `dsh plugin add 包名` 安装，不用记完整的 GitHub 地址\n'
+      guide += '- 🔗 **依赖管理**：自动处理 peerDependencies（cordis、dsh-tools 等）\n'
+      guide += '- 🔄 **版本管理**：跑 `dsh plugin update 包名` 就能升级\n'
+      guide += '- 如果只发布 GitHub，用户安装时要写完整地址，但还是能用的\n'
+      guide += '\n'
+      guide += '### 简单总结\n'
+      guide += '| 场景 | GitHub | npm |\n'
+      guide += '|------|--------|----|\n'
+      guide += '| 自己本地用 | ❌ 不需要 | ❌ 不需要 |\n'
+      guide += '| 给同事装（内部） | ✅ 推荐 | ❌ 可选 |\n'
+      guide += '| 给社区用（公开） | ✅ 必须（搜插件） | ✅ 推荐（方便安装） |\n'
+      guide += '\n'
+
+      guide += '---\n\n'
       guide += '## 发布前检查清单\n\n'
       guide += '请先用 `dsh_plugin_check` 工具检查项目结构，确认没有问题后再发布。\n\n'
 
@@ -319,34 +342,50 @@ export function apply(ctx: Context) {
       guide += 'git commit -m "feat: initial release"\n\n'
       guide += '# 创建 GitHub 仓库并推送\n'
       guide += 'gh repo create 你的仓库名 --public --source . --push\n\n'
-      guide += '# 打上 dsh-plugin 标签（重要！别人才能搜到）\n'
-      guide += 'gh repo edit --add-topic dsh-plugin\n'
+      guide += '# 打上 dsh-plugin 标签（重要！别人才能搜到你的插件）\n'
+      guide += 'gh repo edit --add-topic dsh-plugin\n\n'
+      guide += '# 可选：还可以打更多标签帮助别人发现\n'
+      guide += 'gh repo edit --add-topic log-analysis --add-topic developer-tools\n'
       guide += '```\n\n'
-      guide += '> 💡 `dsh-plugin` 标签是必须的！DSH 社区通过这个标签发现插件。\n\n'
+      guide += '> 💡 `dsh-plugin` 标签是 DSH 社区发现插件的**唯一渠道**！\n'
+      guide += '> 没有这个标签，别人在 GitHub 上搜 `dsh-plugin` 就找不到你。\n\n'
 
       if (!target || target !== 'github') {
         guide += '---\n\n## 2. 发布到 npm\n\n'
         guide += '```powershell\n'
-        guide += '# 登录 npm\n'
+        guide += '# 登录 npm（首次需要输入用户名、密码、邮箱）\n'
         guide += 'npm login\n\n'
-        guide += '# 发布\n'
+        guide += '# 发布到 npm\n'
         guide += 'npm publish --access public\n'
         guide += '```\n\n'
-        guide += '> 💡 如果 npm 账号开启了 2FA，需要生成 Automation Token 来发布。\n\n'
+        guide += '> ⚠️ 常见问题：\n'
+        guide += '> - 如果开启了 2FA 两步验证，需要生成 Automation Token 来发布\n'
+        guide += '> - 包名不能重复，如果 npm 上已有同名包会报错\n'
+        guide += '> - npm 有供应链安全策略，新发布的包可能需要等几分钟才能被安装\n\n'
       }
 
       guide += '---\n\n## 3. 别人安装你的插件\n\n'
       guide += '```powershell\n'
-      guide += '# 从 GitHub 安装\n'
+      guide += '# 从 GitHub 安装（不需要 npm 发布）\n'
       guide += 'dsh plugin --profile web add github:你的用户名/仓库名\n\n'
-      guide += '# 从 npm 安装\n'
+      guide += '# 从 npm 安装（需要先 npm publish）\n'
       guide += 'dsh plugin --profile web add 你的npm包名\n'
       guide += '```\n\n'
 
       guide += '---\n\n## 4. 发布后维护\n\n'
-      guide += '- 更新版本：改 package.json 中的 version，重新 `npm publish`\n'
-      guide += '- 更新 GitHub：`git add . && git commit -m "..." && git push`\n'
-      guide += '- 打标签：`git tag v0.1.1 && git push --tags`\n'
+      guide += '```powershell\n'
+      guide += '# 更新代码到 GitHub\n'
+      guide += 'git add .\n'
+      guide += 'git commit -m "修复了某个 bug"\n'
+      guide += 'git push\n\n'
+      guide += '# 更新 npm 版本（修改 package.json 里的 version 字段）\n'
+      guide += '# 比如从 "0.1.0" 改成 "0.1.1"\n'
+      guide += 'npm publish\n'
+      guide += '```\n\n'
+      guide += '> 💡 版本号规则：`主版本.次版本.补丁`\n'
+      guide += '> - 修复 bug：升补丁号（0.1.0 → 0.1.1）\n'
+      guide += '> - 新增功能：升次版本号（0.1.0 → 0.2.0）\n'
+      guide += '> - 大改动不兼容：升主版本号（1.0.0 → 2.0.0）\n'
 
       return { guide }
     },
@@ -489,9 +528,75 @@ export function apply(ctx: Context) {
 npm install -g pnpm
 \`\`\`
 
-## 创建插件目录
-\`\`\`powershell
-mkdir -p scratch-plugin/my-plugin/src
+## 一个 DSH 插件的完整文件结构
+
+\`\`\`
+my-plugin/
+├── package.json         ← 插件的"身份证"
+│   - name: 插件名（必须，npm 包名，如 dsh-my-plugin）
+│   - version: 版本号（如 0.1.0）
+│   - type: "module"（必须）
+│   - main: 入口文件（如 src/index.ts）
+│   - files: 发布时包含哪些文件（如 ["src", "cordis.patch.yml"]）
+│   - dsh.bundle.patch: 指向 cordis.patch.yml
+│   - peerDependencies: 声明需要哪些 DSH 核心包
+│
+├── src/index.ts         ← 插件代码（核心逻辑在这里）
+│   - 导出 name（插件名）
+│   - 导出 apply(ctx)（插件主体）
+│   - 用 defineTool 注册工具
+│   - 用 ctx.on() 监听事件
+│   - 用 webServer 提供 Web 页面
+│
+├── cordis.yml           ← 本地开发配置（不发布）
+│   - 用 file:/// 绝对路径指向 src/index.ts
+│   - 只在本地测试时用
+│
+├── cordis.patch.yml     ← 发布用的挂载配置（必须发布）
+│   - name 写 npm 包名，不是相对路径！
+│   - 别人安装时 DSH 通过这个文件知道怎么加载你的插件
+│   - 示例：
+│     - insert:
+│       - id: my-plugin
+│         name: my-plugin
+│
+├── README.md            ← 别人怎么用你的插件
+│   - 安装方法
+│   - 工具列表
+│   - 使用说明
+│
+├── skills/              ← （可选）给 AI 注入专业知识
+│   └── guide.md         - 用 Markdown 写，AI 会自动学习
+│
+├── ui/                  ← （可选）Web 界面
+│   └── index.html       - 完整的 HTML 页面
+│
+├── .gitignore           ← Git 忽略规则
+│   - 至少忽略 node_modules/、dist/、*.tgz
+│
+└── host.js              ← （可选）动态插件备份，重启后恢复用
+
+## 核心要点
+
+### cordis.yml 和 cordis.patch.yml 的区别
+| 文件 | 用途 | name 怎么写 | 要不要发布 |
+|------|------|------------|-----------|
+| cordis.yml | 本地测试 | file:///绝对路径 | ❌ 不发布 |
+| cordis.patch.yml | 别人安装 | npm 包名 | ✅ 必须发布 |
+
+### 插件三种写法
+\`\`\`typescript
+// 1. 函数插件（最常用）
+export const name = "my-plugin"
+export function apply(ctx) { ... }
+
+// 2. 对象插件
+export const plugin = { name: "my-plugin", apply(ctx) { ... } }
+
+// 3. 类插件
+export class MyPlugin { constructor(ctx) { ... } }
+export const name = "my-plugin"
+export const plugin = MyPlugin
 \`\`\`
 
 ## 创建最简插件
