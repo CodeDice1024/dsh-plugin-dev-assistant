@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-dev-assistant",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH 插件开发助手：对话式引导，从零开始创建、测试、发布 DSH 插件",
   "type": "module",
   "main": "src/index.ts",
