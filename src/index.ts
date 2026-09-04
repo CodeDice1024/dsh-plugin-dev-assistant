@@ -307,64 +307,74 @@ export function apply(ctx: Context) {
       const target = String(args.target ?? '')
       let guide = '# DSH 插件发布指南\n\n'
 
-      guide += '## 先搞清楚：为什么要发布，必须发布吗？\n\n'
-      guide += '**不是必须的！** 如果你只打算自己用，不发布也行，本地开发测试就够了。\n\n'
-      guide += '### 为什么要发布到 GitHub？\n'
-      guide += '- 📦 **版本控制**：代码有历史记录，可以回退\n'
-      guide += '- 🤝 **协作**：同事可以看代码、提 Issue、一起修改\n'
-      guide += '- 🔍 **被发现**：打上 `dsh-plugin` 标签后，别人在 GitHub 搜索 DSH 插件时能找到你\n'
-      guide += '- 📥 **远程安装**：别人可以用 `dsh plugin add github:用户名/仓库名` 安装\n'
-      guide += '\n'
-      guide += '### 为什么要发布到 npm？\n'
-      guide += '- 📥 **短名安装**：别人可以用 `dsh plugin add 包名` 安装，不用记完整的 GitHub 地址\n'
-      guide += '- 🔗 **依赖管理**：自动处理 peerDependencies（cordis、dsh-tools 等）\n'
-      guide += '- 🔄 **版本管理**：跑 `dsh plugin update 包名` 就能升级\n'
-      guide += '- 如果只发布 GitHub，用户安装时要写完整地址，但还是能用的\n'
-      guide += '\n'
-      guide += '### 简单总结\n'
-      guide += '| 场景 | GitHub | npm |\n'
-      guide += '|------|--------|----|\n'
-      guide += '| 自己本地用 | ❌ 不需要 | ❌ 不需要 |\n'
-      guide += '| 给同事装（内部） | ✅ 推荐 | ❌ 可选 |\n'
-      guide += '| 给社区用（公开） | ✅ 必须（搜插件） | ✅ 推荐（方便安装） |\n'
-      guide += '\n'
-
-      guide += '---\n\n'
-      guide += '## 发布前检查清单\n\n'
-      guide += '请先用 `dsh_plugin_check` 工具检查项目结构，确认没有问题后再发布。\n\n'
-
-      guide += '---\n\n## 1. 发布到 GitHub\n\n'
+      guide += '## 第一步：先完成本地开发\n\n'
+      guide += '在你开发插件的过程中，应该已经完成了以下步骤：\n\n'
+      guide += '```\n'
+      guide += 'my-plugin/\n'
+      guide += '├── package.json\n'
+      guide += '├── src/index.ts\n'
+      guide += '├── cordis.patch.yml\n'
+      guide += '├── README.md\n'
+      guide += '└── .gitignore\n'
+      guide += '```\n\n'
+      guide += '代码写好后，在 DSH 根目录运行本地测试，确保功能正常：\n'
       guide += '```powershell\n'
-      guide += '# 初始化 Git 仓库\n'
+      guide += 'pnpm dsh web --patch ./你的插件目录/cordis.yml\n'
+      guide += '```\n\n'
+
+      guide += '---\n\n## 第二步：本地版本管理（git init）\n\n'
+      guide += '```powershell\n'
       guide += 'cd 你的插件目录\n'
       guide += 'git init\n'
       guide += 'git add .\n'
-      guide += 'git commit -m "feat: initial release"\n\n'
-      guide += '# 创建 GitHub 仓库并推送\n'
-      guide += 'gh repo create 你的仓库名 --public --source . --push\n\n'
-      guide += '# 打上 dsh-plugin 标签（重要！别人才能搜到你的插件）\n'
+      guide += 'git commit -m "feat: initial release"\n'
+      guide += '```\n\n'
+      guide += '这一步只是把你本地的代码纳入 Git 管理，跟发布无关。\n\n'
+
+      guide += '---\n\n## 第三步：上传到 GitHub\n\n'
+      guide += '### 为什么上传到 GitHub？\n'
+      guide += '- 别人可以通过 `dsh plugin add github:你的用户名/仓库名` 安装\n'
+      guide += '- 代码有版本历史，可以回退\n'
+      guide += '- 同事可以提 Issue、一起协作\n\n'
+      guide += '### 操作\n'
+      guide += '```powershell\n'
+      guide += 'gh repo create 你的仓库名 --public --source . --push\n'
+      guide += '```\n\n'
+      guide += '> 💡 这一步要求你已经有 GitHub 账号，并且安装了 gh CLI。\n\n'
+
+      guide += '---\n\n## 第四步：打标签（dsh-plugin）\n\n'
+      guide += '### 打什么标？\n'
+      guide += '**必须打 `dsh-plugin` 标签**，还可以打其他标签，比如 `log-analysis`、`developer-tools`。\n\n'
+      guide += '### 为什么打标？\n'
+      guide += '`dsh-plugin` 标签是 DSH 社区发现插件的**唯一渠道**。\n'
+      guide += '用户搜索 DSH 插件时，GitHub 会按 `dsh-plugin` 标签来筛选。\n'
+      guide += '**不打这个标签，别人在 GitHub 上根本搜不到你的插件。**\n\n'
+      guide += '### 操作\n'
+      guide += '```powershell\n'
+      guide += '# 必须打——让别人能搜到\n'
       guide += 'gh repo edit --add-topic dsh-plugin\n\n'
-      guide += '# 可选：还可以打更多标签帮助别人发现\n'
+      guide += '# 可选——帮助别人更精准找到你\n'
       guide += 'gh repo edit --add-topic log-analysis --add-topic developer-tools\n'
       guide += '```\n\n'
-      guide += '> 💡 `dsh-plugin` 标签是 DSH 社区发现插件的**唯一渠道**！\n'
-      guide += '> 没有这个标签，别人在 GitHub 上搜 `dsh-plugin` 就找不到你。\n\n'
 
-      if (!target || target !== 'github') {
-        guide += '---\n\n## 2. 发布到 npm\n\n'
-        guide += '```powershell\n'
-        guide += '# 登录 npm（首次需要输入用户名、密码、邮箱）\n'
-        guide += 'npm login\n\n'
-        guide += '# 发布到 npm\n'
-        guide += 'npm publish --access public\n'
-        guide += '```\n\n'
-        guide += '> ⚠️ 常见问题：\n'
-        guide += '> - 如果开启了 2FA 两步验证，需要生成 Automation Token 来发布\n'
-        guide += '> - 包名不能重复，如果 npm 上已有同名包会报错\n'
-        guide += '> - npm 有供应链安全策略，新发布的包可能需要等几分钟才能被安装\n\n'
-      }
+      guide += '---\n\n## 第五步：发布到 npm（可选）\n\n'
+      guide += '### 为什么发布到 npm？\n'
+      guide += '- 用户安装时不用记 GitHub 地址：`dsh plugin add 包名` 即可\n'
+      guide += '- 自动处理依赖关系（cordis、dsh-tools 等）\n'
+      guide += '- 后续可以 `dsh plugin update 包名` 一键升级\n\n'
+      guide += '### 不发布到 npm 行不行？\n'
+      guide += '**行。** 只发 GitHub 也能用，用户安装时写完整地址而已。\n\n'
+      guide += '### 操作\n'
+      guide += '```powershell\n'
+      guide += 'npm login\n'
+      guide += 'npm publish --access public\n'
+      guide += '```\n\n'
+      guide += '> ⚠️ 常见问题：\n'
+      guide += '> - 如果开启了 2FA，需要生成 Automation Token 来发布\n'
+      guide += '> - 包名不能重复，如果 npm 上已有同名包会报错\n'
+      guide += '> - npm 有供应链安全策略，新发布的包可能需要等几分钟才能被安装\n\n'
 
-      guide += '---\n\n## 3. 别人安装你的插件\n\n'
+      guide += '---\n\n## 第六步：别人安装你的插件\n\n'
       guide += '```powershell\n'
       guide += '# 从 GitHub 安装（不需要 npm 发布）\n'
       guide += 'dsh plugin --profile web add github:你的用户名/仓库名\n\n'
@@ -372,20 +382,20 @@ export function apply(ctx: Context) {
       guide += 'dsh plugin --profile web add 你的npm包名\n'
       guide += '```\n\n'
 
-      guide += '---\n\n## 4. 发布后维护\n\n'
+      guide += '---\n\n## 发布后维护\n\n'
       guide += '```powershell\n'
-      guide += '# 更新代码到 GitHub\n'
+      guide += '# 修改代码后推送 GitHub\n'
       guide += 'git add .\n'
       guide += 'git commit -m "修复了某个 bug"\n'
       guide += 'git push\n\n'
-      guide += '# 更新 npm 版本（修改 package.json 里的 version 字段）\n'
+      guide += '# 同时更新 npm（改 package.json 里的 version）\n'
       guide += '# 比如从 "0.1.0" 改成 "0.1.1"\n'
       guide += 'npm publish\n'
       guide += '```\n\n'
-      guide += '> 💡 版本号规则：`主版本.次版本.补丁`\n'
-      guide += '> - 修复 bug：升补丁号（0.1.0 → 0.1.1）\n'
-      guide += '> - 新增功能：升次版本号（0.1.0 → 0.2.0）\n'
-      guide += '> - 大改动不兼容：升主版本号（1.0.0 → 2.0.0）\n'
+      guide += '版本号规则：`主版本.次版本.补丁`\n'
+      guide += '- 修复 bug：升补丁号（0.1.0 → 0.1.1）\n'
+      guide += '- 新增功能：升次版本号（0.1.0 → 0.2.0）\n'
+      guide += '- 大改动不兼容：升主版本号（1.0.0 → 2.0.0）\n'
 
       return { guide }
     },
@@ -532,110 +542,96 @@ npm install -g pnpm
 
 \`\`\`
 my-plugin/
-├── package.json         ← 插件的"身份证"
-│   - name: 插件名（必须，npm 包名，如 dsh-my-plugin）
-│   - version: 版本号（如 0.1.0）
-│   - type: "module"（必须）
-│   - main: 入口文件（如 src/index.ts）
-│   - files: 发布时包含哪些文件（如 ["src", "cordis.patch.yml"]）
-│   - dsh.bundle.patch: 指向 cordis.patch.yml
-│   - peerDependencies: 声明需要哪些 DSH 核心包
-│
-├── src/
-│   ├── index.ts         ← 插件主入口（核心逻辑）
-│   │   - 导出 name（插件名）
-│   │   - 导出 apply(ctx)（插件主体）
-│   │   - 用 defineTool 注册工具
-│   │   - 用 ctx.on() 监听事件
-│   │   - 用 webServer 提供 Web 页面
-│   │
-│   └── parser.ts        ← （可选）拆分复杂逻辑
-│       - 当 index.ts 代码太长时，拆到 parser.ts 里
-│       - 在 index.ts 中用 import 导入
-│       - 示例：dsh-log-viewer 就把日志解析逻辑拆到 parser.ts，有 400+ 行
-│
+├── package.json         ← 插件的身份证
+├── src/index.ts         ← 插件代码（核心逻辑）
+├── src/parser.ts        ← （可选）拆分复杂逻辑
 ├── cordis.yml           ← 本地开发配置（不发布）
-│   - 用 file:/// 绝对路径指向 src/index.ts
-│   - 只在本地测试时用
-│
-├── cordis.patch.yml     ← 发布用的挂载配置（必须发布）
-│   - name 写 npm 包名，不是相对路径！
-│   - 别人安装时 DSH 通过这个文件知道怎么加载你的插件
-│   - 示例：
-│     - insert:
-│       - id: my-plugin
-│         name: my-plugin
-│
-├── README.md            ← 别人怎么用你的插件
-│   - 安装方法
-│   - 工具列表
-│   - 使用说明
-│
-├── skills/
-│   └── guide.md          ← （可选）给 AI 注入专业知识
-│       - 用 Markdown 写，内容会注入到 AI 的提示词中
-│       - 在 index.ts 中通过 skills.register() 注册
-│       - 示例内容：
-│         # 日志分析领域知识
-│
-│         ## 常见异常
-│         - NullPointerException：空指针
-│         - SQLException：数据库问题
-│
-│         ## 排查步骤
-│         1. 先看堆栈第一行
-│         2. 找到业务代码包名
-│         3. 分析根因
-│
-├── ui/
-│   └── index.html       ← （可选）Web 界面
-│       - 完整的 HTML 页面
-│       - 通过 webServer 路由提供（如 /my-plugin）
-│       - 可以调用后端 API 获取数据
-│       - 示例结构：
-│         <!DOCTYPE html>
-│         <html>
-│         <head>
-│           <link rel="stylesheet" href="style.css">
-│         </head>
-│         <body>
-│           <h1>仪表盘</h1>
-│           <div id="app"></div>
-│           <script>
-│             fetch('/my-plugin/api/data')
-│               .then(r => r.json())
-│               .then(data => { ... })
-│           </script>
-│         </body>
-│         </html>
-│
+├── cordis.patch.yml     ← 发布用挂载配置（必须发布）
+├── README.md            ← 别人怎么用
 ├── .gitignore           ← Git 忽略规则
-│   - 至少忽略 node_modules/、dist/、*.tgz
-│
-└── host.js              ← （可选）动态插件备份，重启后恢复用
+├── skills/guide.md      ← （可选）给 AI 注入专业知识
+└── ui/index.html        ← （可选）Web 界面
+\`\`\`
 
-## 核心要点
+## 各文件详细说明
+
+### package.json
+插件身份证，包含 name（npm 包名）、version（版本号）、main（入口文件）、files（发布包含哪些文件）、dsh.bundle.patch（指向 cordis.patch.yml）、peerDependencies（依赖哪些 DSH 核心包）。
+
+### src/index.ts
+插件主入口，所有核心逻辑都在这里。导出 name 和 apply(ctx)，在里面注册工具、监听事件、提供 Web 页面。
+
+### src/parser.ts（可选）
+当 index.ts 代码太长时，把复杂逻辑拆分到独立文件。比如日志解析、数据转换等。在 index.ts 中用 import 导入。
+\`\`\`typescript
+// src/parser.ts
+export function parseData(raw: string) { ... }
+
+// src/index.ts
+import { parseData } from './parser.js'
+\`\`\`
+> 示例：dsh-log-viewer 的 parser.ts 有 400+ 行，专门处理日志解析逻辑。
+
+### skills/guide.md（可选）
+给 AI 注入专业知识的 Markdown 文件，内容会进入 AI 的提示词，让 AI 更懂你的领域。
+\`\`\`markdown
+# 日志分析领域知识
+## 常见异常
+- NullPointerException：空指针
+- SQLException：数据库问题
+## 排查步骤
+1. 先看堆栈第一行
+2. 找到业务代码包名
+3. 分析根因
+\`\`\`
+在 index.ts 中注册：
+\`\`\`typescript
+const skills = ctx.get("skills")
+if (skills) {
+  const content = readFileSync("./skills/guide.md", "utf-8")
+  skills.register({
+    name: "my-guide",
+    description: "领域知识",
+    content,
+    source: "runtime",
+    provider: "my-plugin",
+  })
+}
+\`\`\`
+
+### ui/index.html（可选）
+完整的 HTML 页面，通过 webServer 路由提供。可以调用后端 API 获取数据。
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>仪表盘</h1>
+  <script>
+    fetch('/my-plugin/api/data')
+      .then(r => r.json())
+      .then(data => { /* 渲染数据 */ })
+  </script>
+</body>
+</html>
+\`\`\`
+在 index.ts 中注册路由：
+\`\`\`typescript
+ctx.inject(["webServer"], (webCtx) => {
+  webCtx.webServer.register({
+    kind: "prefix",
+    path: "/my-plugin",
+    handler: async (req, res) => {
+      res.end(yourHtml)
+    },
+  })
+})
+\`\`\`
 
 ### cordis.yml 和 cordis.patch.yml 的区别
 | 文件 | 用途 | name 怎么写 | 要不要发布 |
 |------|------|------------|-----------|
 | cordis.yml | 本地测试 | file:///绝对路径 | ❌ 不发布 |
 | cordis.patch.yml | 别人安装 | npm 包名 | ✅ 必须发布 |
-
-### 插件三种写法
-\`\`\`typescript
-// 1. 函数插件（最常用）
-export const name = "my-plugin"
-export function apply(ctx) { ... }
-
-// 2. 对象插件
-export const plugin = { name: "my-plugin", apply(ctx) { ... } }
-
-// 3. 类插件
-export class MyPlugin { constructor(ctx) { ... } }
-export const name = "my-plugin"
-export const plugin = MyPlugin
-\`\`\`
 
 ## 创建最简插件
 \`\`\`typescript
